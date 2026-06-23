@@ -13,7 +13,7 @@
             <div>
             
             <h3> ------- ------- -  </h3>
-            <h3> <%= product.id %>  : <%= product.name %> </h3>
+            <a href="/products/<%= product.id %>"> <%= product.name %> </a>
             <h3> created_at : <%= product.created_at %> </h3>
           </div>
         <%end %>
