@@ -1,0 +1,24 @@
+
+
+    <h1>Create Products</h1>
+<%= link_to "Back", products_url %>
+
+
+
+<%= form_with model: @product do |form| %>
+
+    <div>
+        <%= form.label :name  %>
+        <%= form.text_field :name  %>
+    </div>
+
+    <div>
+        <%= form.submit %>
+    </div>
+
+<% end %>
+
+<%= link_to "cancel", products_path %>
+
+
+
