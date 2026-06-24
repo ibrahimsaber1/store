@@ -8,6 +8,9 @@
     <h4> Created ID: <%= @product.created_at %></h4>
     <h4> Updated ID: <%= @product.updated_at %></h4>
 
+    <%= image_tag @product.featured_image if @product.featured_image.attached? %>
+
+
 </div>
 
 <%= link_to "Back", products_path %>
