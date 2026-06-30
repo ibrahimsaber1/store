@@ -1,18 +1,32 @@
+<div class="row justify-content-center">
+  <div class="col-lg-8">
 
-<h1> the product page</h1>
+    <div class="card shadow-sm">
+      <% if @product.featured_image.attached? %>
+        <%= image_tag @product.featured_image, class: "card-img-top", style: "max-height: 400px; object-fit: cover;" %>
+      <% end %>
 
-<div>
+      <div class="card-body">
+        <h1 class="card-title h2 mb-3"><%= @product.name %></h1>
 
-    <h4> name : <%= @product.name %></h4>
-      <%= @product.description %>
-    <h4> Created ID: <%= @product.created_at %></h4>
-    <h4> Updated ID: <%= @product.updated_at %></h4>
+        <% if @product.description.present? %>
+          <div class="mb-4">
+            <%= @product.description %>
+          </div>
+        <% end %>
 
-    <%= image_tag @product.featured_image if @product.featured_image.attached? %>
+        <p class="text-muted small mb-0">Added <%= @product.created_at.strftime("%B %d, %Y") %></p>
+        <p class="text-muted small">Last updated <%= @product.updated_at.strftime("%B %d, %Y") %></p>
+      </div>
 
+      <div class="card-footer bg-transparent d-flex gap-2">
+        <%= link_to "Edit", edit_product_path(@product), class: "btn btn-outline-secondary" %>
+        <%= button_to "Delete", @product, method: :delete,
+            class: "btn btn-outline-danger",
+            data: { turbo_confirm: "Are you sure?" } %>
+        <%= link_to "Back to Products", products_path, class: "btn btn-link text-muted ms-auto" %>
+      </div>
+    </div>
 
+  </div>
 </div>
-
-<%= link_to "Back", products_path %>
-<%= link_to "Edit", edit_product_path(@product) %>
-<%= button_to "Delete", @product, method: :delete, data: { turbo_confirm: "Are You Sure ?"}  %>

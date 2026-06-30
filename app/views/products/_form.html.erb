@@ -1,27 +1,33 @@
 <%= form_with model: product do |form| %>
 
-    <div>
-        <%= form.label :description, style: "display: block" %>
-        <%= form.rich_textarea :description %>
+  <% if form.object.errors.any? %>
+    <div class="alert alert-danger">
+      <ul class="mb-0">
+        <% form.object.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
     </div>
+  <% end %>
 
-      <div>
-        <%= form.label :featured_image, style: "display: block" %>
-        <%= form.file_field :featured_image, accept: "image/*" %>
-    </div>
+  <div class="mb-3">
+    <%= form.label :name, class: "form-label fw-semibold" %>
+    <%= form.text_field :name, class: "form-control" %>
+  </div>
 
-    <% if form.object.errors.any? %>
-    <p class="error"> <%= form.object.errors.full_messages.first %> </p>
-    <% end %>
+  <div class="mb-3">
+    <%= form.label :description, class: "form-label fw-semibold" %>
+    <%= form.rich_textarea :description, class: "form-control" %>
+  </div>
 
-    <div>
-        <%= form.label :name  %>
-        <%= form.text_field :name  %>
-    </div>
+  <div class="mb-4">
+    <%= form.label :featured_image, class: "form-label fw-semibold" %>
+    <%= form.file_field :featured_image, accept: "image/*", class: "form-control" %>
+  </div>
 
-    <div>
-        <%= form.submit %>
-    </div>
+  <div class="d-flex gap-2">
+    <%= form.submit class: "btn btn-primary" %>
+  </div>
 
 <% end %>
 
