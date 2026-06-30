@@ -7,6 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Ruby 3.3.6, Rails 8.1
 - SQLite3 (development and test)
 - Propshaft (asset pipeline), Importmap (no Node/bundler), Hotwire (Turbo + Stimulus)
+- Action Text (rich text via Trix) + Active Storage (file uploads, disk service in dev)
 - Solid Cache / Solid Queue / Solid Cable (DB-backed adapters — no Redis required)
 - Deployed via Kamal (Docker)
 
@@ -28,10 +29,32 @@ bin/importmap audit           # check JS dependencies for vulnerabilities
 
 ## Architecture
 
-This is a standard Rails MVC app, currently in early development. The only domain model so far is `Product` (`app/models/product.rb`) with a `name` string column.
+### Domain models
 
-Routes are empty (no root route yet) — the app boots but serves nothing at `/`.
+- `Product` — `name:string`, `featured_image` (Active Storage attachment), `description` (Action Text rich text). Validates name presence.
+- `User` — `email_address:string`, `password_digest:string` (bcrypt via `has_secure_password`). Email is normalized (strip + downcase). Has many sessions.
+- `Session` — belongs to User; stores `ip_address` and `user_agent`. Used to track login sessions via a signed cookie.
+- `Current` (`ActiveSupport::CurrentAttributes`) — holds `Current.session`; delegates `.user` to it. This is the thread-local accessor for the authenticated user throughout a request.
 
-JavaScript follows the Stimulus controller pattern: controllers live in `app/javascript/controllers/` and are auto-loaded via `app/javascript/controllers/index.js`.
+### Authentication
 
-CI (`.github/workflows/ci.yml`) runs four jobs: `scan_ruby` (Brakeman + bundler-audit), `scan_js` (importmap audit), `lint` (RuboCop), and `test` + `system-test`.
+Authentication lives in `app/controllers/concerns/authentication.rb` and is included in `ApplicationController`. All actions require authentication by default. Controllers opt out with `allow_unauthenticated_access`. Session state is carried in a signed permanent cookie (`session_id`). The `PasswordsController` + `PasswordsMailer` handle password reset via email tokens.
+
+### Localization
+
+`ApplicationController` wraps every action in `I18n.with_locale` via `around_action :switch_locale`. Locale is read from `params[:locale]` with fallback to the default. Locale files live in `config/locales/` (currently `en` and `es`).
+
+### Routes
+
+```
+resource  :session                   # login/logout
+resources :passwords, param: :token  # password reset
+root      "products#home"
+resources :products                  # full CRUD
+```
+
+### Testing
+
+Integration tests can use `sign_in_as(user)` and `sign_out` helpers from `test/test_helpers/session_test_helper.rb`, which is auto-included into `ActionDispatch::IntegrationTest`.
+
+CI (`.github/workflows/ci.yml`) runs: `scan_ruby` (Brakeman + bundler-audit), `scan_js` (importmap audit), `lint` (RuboCop), `test`, and `system-test`.
